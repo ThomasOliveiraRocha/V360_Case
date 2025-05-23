@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mini Trello V360</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f9f9fb;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  #board {
+    display: flex;
+    gap: 15px;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .column {
+    background: #ebecf0;
+    border-radius: 8px;
+    padding: 10px;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+  }
+
+  .column h2 {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #6F41E2; /* Roxo V360 no título */
+  }
+
+  .card {
+    background: #6F41E2; /* Roxo vibrante */
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(111, 65, 226, 0.4);
+    cursor: pointer;
+    font-weight: 600;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .card:hover {
+    background: #572ecc; /* Roxo mais escuro no hover */
+  }
+
+  .add-card {
+    background: #FF7E00; /* Laranja vibrante */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: auto;
+    transition: background-color 0.3s ease;
+  }
+  .add-card:hover {
+    background: #e66a00; /* Laranja escuro no hover */
+  }
+
+  .add-card-input {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<div id="board">
+  <div class="column" data-list-id="1" data-status="todo">
+    <h2>To Do</h2>
+    <div class="cards"></div>
+    <button class="add-card">+ Adicionar cartão</button>
+    <input class="add-card-input" type="text" placeholder="Novo cartão" style="display:none" />
+  </div>
+  <div class="column" data-list-id="2" data-status="doing">
+    <h2>Doing</h2>
+    <div class="cards"></div>
+    <button class="add-card">+ Adicionar cartão</button>
+    <input class="add-card-input" type="text" placeholder="Novo cartão" style="display:none" />
+  </div>
+  <div class="column" data-list-id="3" data-status="done">
+    <h2>Done</h2>
+    <div class="cards"></div>
+    <button class="add-card">+ Adicionar cartão</button>
+    <input class="add-card-input" type="text" placeholder="Novo cartão" style="display:none" />
+  </div>
+</div>
+
+<script>
+  // Função para criar card DOM
+  function createCard(text) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.textContent = text;
+    return card;
+  }
+
+  // Função para enviar o novo card para o backend
+  async function saveCardToBackend(listId, content) {
+    try {
+      const response = await fetch(`/api/lists/${listId}/items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content })
+      });
+      if (!response.ok) {
+        throw new Error(`Erro ao salvar card: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data; // pode conter o card salvo com id, timestamps, etc.
+    } catch (error) {
+      alert(error.message);
+      return null;
+    }
+  }
+
+  document.querySelectorAll('.column').forEach(column => {
+    const addBtn = column.querySelector('.add-card');
+    const input = column.querySelector('.add-card-input');
+    const cardsContainer = column.querySelector('.cards');
+    const listId = column.getAttribute('data-list-id');
+
+    addBtn.addEventListener('click', () => {
+      addBtn.style.display = 'none';
+      input.style.display = 'block';
+      input.focus();
+    });
+
+    input.addEventListener('keydown', async e => {
+      if (e.key === 'Enter' && input.value.trim() !== '') {
+        const content = input.value.trim();
+
+        // Salvar no backend antes de adicionar visualmente
+        const savedCard = await saveCardToBackend(listId, content);
+
+        if (savedCard) {
+          const card = createCard(content);
+          cardsContainer.appendChild(card);
+          input.value = '';
+          input.style.display = 'none';
+          addBtn.style.display = 'block';
+        }
+      } else if (e.key === 'Escape') {
+        input.style.display = 'none';
+        addBtn.style.display = 'block';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
