@@ -44,6 +44,7 @@ async function addItem(listId) {
   const input = document.getElementById(`input-${listId}`);
   const content = input.value;
   if (!content) return;
+  
   await fetch(`${apiUrl}/lists/${listId}/items`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

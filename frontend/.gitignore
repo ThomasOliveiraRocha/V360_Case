@@ -4,3 +4,5 @@ __pycache__/
 *.pyd
 *.db
 .env
+**/node_modules/
+**/node/
