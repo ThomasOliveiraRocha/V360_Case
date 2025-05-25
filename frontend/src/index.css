@@ -1,68 +1,248 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+:root {
+  --bg-color: #f4f4f4;
+  --text-color: #333;
+  --card-bg: #fff;
+  --list-bg: #e9e9e9;
+}
+
+body.dark {
+  --bg-color: #1e1e1e;
+  --text-color: #f4f4f4;
+  --card-bg: #2c2c2c;
+  --list-bg: #333;
+}
+
+/* Header */
+.header {
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+.theme-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+
+/* Board */
+.board {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+/* List */
+.list {
+  background-color: var(--list-bg);
+  padding: 10px;
+  border-radius: 8px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.list-header h3 {
+  font-size: 1.1rem;
+}
+
+.list-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-color);
+  font-size: 1.2rem;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.delete-button:hover {
+  color: red;
+  transform: scale(1.2);
+}
+
+/* Card */
+.card {
+  background-color: var(--card-bg);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-color);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.delete-button:hover {
+  color: red;
+  transform: scale(1.2);
+}
+
+
+/* Form */
+.card-form,
+.list-form {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.card-form input,
+.list-form input,
+.card-form select {
+  padding: 5px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+.card-form button,
+.list-form button {
+  padding: 5px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.card-form button:hover,
+.list-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Checklist */
+.checklist {
+  margin-top: 5px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.checklist-item input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Usuarios */
+.user-form {
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.user-form input {
+  padding: 0.4rem 0.6rem;
+}
+
+.user-form button {
+  padding: 0.4rem 0.8rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar {
+  background: var(--sidebar-bg);
+  padding: 16px;
+  border-right: 1px solid var(--border);
+}
+
+.sidebar h2 {
+  margin-bottom: 8px;
+}
+
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.user-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg);
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+}
+
+.add-user {
+  display: flex;
+  gap: 4px;
+}
+
+.add-user input {
+  flex: 1;
+  padding: 4px 8px;
+}
+
+.add-user button {
+  padding: 4px 8px;
+  cursor: pointer;
 }

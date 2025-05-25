@@ -12,7 +12,7 @@ python app.py
 
 Front:
 
-
+se não tiver
 npm create vite@latest
 #React
 #JavaScript

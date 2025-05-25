@@ -1,21 +1,29 @@
 import React from 'react';
-import { useAppContext } from '../context/AppContext';
-import Checklist from './Checklist';
+import { Draggable } from '@hello-pangea/dnd';
 
-export default function Card({ card, onDragStart }) {
-  const { deleteCard } = useAppContext();
-
+export default function Card({ card, index, onDelete }) {
   return (
-    <div
-      className="card"
-      draggable
-      onDragStart={onDragStart}
-    >
-      <div className="card-header">
-        <span>{card.text}</span>
-        <button onClick={() => deleteCard(card.listId, card.id)}>🗑️</button>
-      </div>
-      <Checklist card={card} />
-    </div>
+    <Draggable draggableId={card.id} index={index}>
+      {(provided) => (
+        <div
+          className="card"
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          <p>{card.text}</p>
+          
+          <div className="card-footer">
+            <small>
+              {card.assignedUser ? card.assignedUser : 'Não atribuído'}
+            </small>
+
+            <button onClick={onDelete} className="delete-button" title="Excluir">
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+    </Draggable>
   );
 }

@@ -1,56 +1,68 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
+import React from 'react';
+import { Droppable } from '@hello-pangea/dnd';
 import Card from './Card';
 
-export default function List({ list }) {
-  const { addCard, deleteList, moveCard } = useAppContext();
-  const [draggedCard, setDraggedCard] = useState(null);
-
-  const handleAddCard = () => {
-    const text = prompt('Texto do novo card:');
-    if (text) {
-      addCard(list.id, text);
-    }
-  };
-
-  const handleDragStart = (card) => {
-    setDraggedCard(card);
-  };
-
-  const handleDrop = (e) => {
+export default function List({
+  list,
+  cards,
+  onAddCard,
+  onDeleteList,
+  onDeleteCard,
+  onUpdateCard,
+}) {
+  const handleAddCard = (e) => {
     e.preventDefault();
-    if (draggedCard) {
-      moveCard(draggedCard.listId, draggedCard.id, list.id);
-      setDraggedCard(null);
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
+    const text = e.target.elements.text.value;
+    const assignedUser = e.target.elements.assignedUser.value;
+    if (!text) return;
+    onAddCard(list.id, text, assignedUser || 'Não atribuído');
+    e.target.reset();
   };
 
   return (
-    <div
-      className="list"
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-    >
+    <div className="list">
       <div className="list-header">
         <h3>{list.title}</h3>
-        <button onClick={() => deleteList(list.id)}>🗑️</button>
+        <button
+          onClick={() => onDeleteList(list.id)}
+          className="delete-button"
+          title="Excluir lista"
+        >
+          &times;
+        </button>
       </div>
-      <div className="cards">
-        {list.cards.map((card) => (
-          <Card
-            key={card.id}
-            card={{ ...card, listId: list.id }}
-            onDragStart={() => handleDragStart({ ...card, listId: list.id })}
-          />
-        ))}
-      </div>
-      <button className="add-card-button" onClick={handleAddCard}>
-        + Adicionar Card
-      </button>
+
+      <Droppable droppableId={list.id}>
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className="card-container"
+          >
+            {cards.map((card, index) => (
+              <Card
+                key={card.id}
+                card={card}
+                index={index}
+                onDelete={() => onDeleteCard(card.id)}
+                onUpdate={onUpdateCard}
+              />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+
+      <form onSubmit={handleAddCard} className="card-form">
+        <input name="text" placeholder="Novo card" />
+        <select name="assignedUser">
+          <option value="">Atribuir usuário</option>
+          <option value="👤 João">João</option>
+          <option value="👤 Maria">Maria</option>
+          <option value="👤 Ana">Ana</option>
+        </select>
+        <button type="submit">Adicionar Card</button>
+      </form>
     </div>
   );
 }
