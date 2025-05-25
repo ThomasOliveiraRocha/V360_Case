@@ -1,0 +1,22 @@
+Back:
+python -m venv venv 
+.\venv\Scripts\activate
+python app.py 
+
+
+---------------------------------------------
+---------------------------------------------
+---------------------------------------------
+---------------------------------------------
+
+
+Front:
+
+
+npm create vite@latest
+#React
+#JavaScript
+
+npm install
+npm run dev
+

@@ -1,0 +1,285 @@
+:root {
+  --primary: #6f42c1;
+  --secondary: #fd7e14;
+  --bg-light: #f4f5f7;
+  --bg-dark: #1a1a1a;
+  --text-light: #333;
+  --text-dark: #f4f4f4;
+  --card-bg-light: #ffffff;
+  --card-bg-dark: #2a2a2a;
+}
+
+/* Corpo */
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+/* Layout */
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  background-color: var(--primary);
+  color: white;
+  padding: 20px;
+  width: 260px;
+  position: fixed;
+  top: 60px; /* começa abaixo do header */
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+}
+
+.main {
+  margin-left: 260px;
+  margin-top: 60px;
+  padding: 20px;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+/* Board */
+.board {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.board-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.board-header input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.board-header button {
+  padding: 8px 12px;
+  background-color: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.board-header button:hover {
+  background-color: #e66d00;
+}
+
+/* Lists */
+.lists {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  height: 100%;
+}
+
+.list {
+  background-color: var(--card-bg-light);
+  padding: 16px;
+  border-radius: 10px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  transition: background-color 0.3s;
+}
+
+body.dark .list {
+  background-color: var(--card-bg-dark);
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-header h3 {
+  margin: 0;
+}
+
+.list-header button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+.add-card-button {
+  margin-top: 8px;
+  padding: 6px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.add-card-button:hover {
+  background-color: #5a38a0;
+}
+
+/* Cards */
+.cards {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.card {
+  background-color: var(--card-bg-light);
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #ddd;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+body.dark .card {
+  background-color: var(--card-bg-dark);
+  border-color: #444;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card:active {
+  cursor: grabbing;
+}
+
+/* Checklist */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checklist-item input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.checklist-item span.done {
+  text-decoration: line-through;
+  color: gray;
+}
+
+.checklist-item button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+.add-subitem-button {
+  margin-top: 4px;
+  padding: 4px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.add-subitem-button:hover {
+  background-color: #5a38a0;
+}
+
+/* Scroll */
+.lists, .cards {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+.lists::-webkit-scrollbar,
+.cards::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.lists::-webkit-scrollbar-thumb,
+.cards::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 8px;
+}
+
+.lists::-webkit-scrollbar-track,
+.cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Theme Button */
+.theme-button {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  padding: 8px 12px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1100;
+  transition: background-color 0.3s;
+}
+
+.theme-button:hover {
+  background-color: #5a38a0;
+}
