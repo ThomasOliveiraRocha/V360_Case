@@ -15,8 +15,13 @@ body {
 :root {
   --bg-color: #f4f4f4;
   --text-color: #333;
-  --card-bg: #fff;
-  --list-bg: #e9e9e9;
+  --card-bg: #ffffff;
+  --list-bg: #ececec;
+  --border-color: #d1d1d1;
+
+  --primary-color: #6C63FF;  /* Roxo */
+  --accent-color: #FF6C37;   /* Laranja */
+  --sidebar-bg: #ffffff;
 }
 
 body.dark {
@@ -24,7 +29,13 @@ body.dark {
   --text-color: #f4f4f4;
   --card-bg: #2c2c2c;
   --list-bg: #333;
+  --border-color: #444;
+
+  --primary-color: #6C63FF;
+  --accent-color: #FF6C37;
+  --sidebar-bg: #2c2c2c;
 }
+
 
 /* Header */
 .header {
@@ -33,17 +44,25 @@ body.dark {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--primary-color);
+  color: white;
+  border-bottom: 2px solid var(--accent-color);
 }
 
 .theme-button {
-  background: none;
+  background-color: var(--accent-color);
+  color: white;
   border: none;
-  font-size: 1.2rem;
+  padding: 6px 10px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
+
+.theme-button:hover {
+  background-color: #ff5720;
+}
+
 
 
 /* Board */
@@ -58,10 +77,11 @@ body.dark {
 .list {
   background-color: var(--list-bg);
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   min-width: 280px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .list-header {
@@ -82,12 +102,24 @@ body.dark {
   font-size: 1rem;
 }
 
+.empty-message {
+  text-align: center;
+  color: var(--text-color);
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  background-color: rgba(200, 200, 200, 0.1);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  backdrop-filter: blur(2px);
+}
+
+/* delete-button */
 .delete-button {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-color);
-  font-size: 1.2rem;
+  color: var(--accent-color);
   padding: 4px;
   display: flex;
   align-items: center;
@@ -104,12 +136,13 @@ body.dark {
 .card {
   background-color: var(--card-bg);
   padding: 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border-left: 4px solid var(--primary-color);
 }
 
 .card-footer {
@@ -156,20 +189,25 @@ body.dark {
 }
 
 .card-form button,
-.list-form button {
-  padding: 5px;
+.list-form button,
+.user-form button,
+.add-user button {
+  padding: 6px 10px;
   cursor: pointer;
   border: none;
-  border-radius: 4px;
-  background-color: #007bff;
+  border-radius: 6px;
+  background-color: var(--primary-color);
   color: white;
   transition: background-color 0.3s;
 }
 
 .card-form button:hover,
-.list-form button:hover {
-  background-color: #0056b3;
+.list-form button:hover,
+.user-form button:hover,
+.add-user button:hover {
+  background-color: #5249d6;
 }
+
 
 /* Checklist */
 .checklist {
@@ -234,15 +272,74 @@ body.dark {
 
 .add-user {
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .add-user input {
-  flex: 1;
-  padding: 4px 8px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  width: 100%;
 }
 
 .add-user button {
-  padding: 4px 8px;
+  padding: 6px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s;
+}
+
+.add-user button:hover {
+  background-color: #5249d6;
+}
+
+
+/* Sidebar */
+.main {
+  display: flex;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: var(--sidebar-bg);
+  padding: 1rem;
+  border-right: 2px solid var(--border-color);
+}
+
+.sidebar h2 {
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.user-list li {
+  background-color: var(--list-bg);
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-user input {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.add-user button {
+  width: 100%;
+}
+
+
+.board {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  overflow-x: auto;
 }

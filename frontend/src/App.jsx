@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useAppContext } from './context/AppContext';
 import { DragDropContext } from '@hello-pangea/dnd';
 import Header from './components/Header';
 import List from './components/List';
+import Sidebar from './components/Sidebar'; // ⬅️ Importa a Sidebar
 import './index.css';
 
 function App() {
+  const { users } = useAppContext();
   const [theme, setTheme] = useState('light');
+
   const [lists, setLists] = useState([
     { id: 'list-1', title: 'A Fazer' },
     { id: 'list-2', title: 'Em Progresso' },
@@ -13,12 +17,12 @@ function App() {
   ]);
 
   const [cards, setCards] = useState([
-    { id: 'card-1', text: 'Criar interface', listId: 'list-1', assignedUser: '👤 João' },
-    { id: 'card-2', text: 'Fazer backend', listId: 'list-2', assignedUser: '👤 Maria' },
+    { id: 'card-1', text: 'Criar interface', listId: 'list-1', assignedUser: 'Thomas' },
+    { id: 'card-2', text: 'Fazer backend', listId: 'list-2', assignedUser: 'Larissa' },
     { id: 'card-3', text: 'Testar', listId: 'list-3', assignedUser: '' },
   ]);
 
-  // 🌙 Dark/Light
+  // 🌙 Tema
   useEffect(() => {
     document.body.className = theme === 'dark' ? 'dark' : '';
   }, [theme]);
@@ -47,7 +51,7 @@ function App() {
     setLists([...lists, newList]);
   };
 
-  // 🗑️ Deletar Lista (e os cards dentro dela)
+  // 🗑️ Deletar Lista
   const handleDeleteList = (listId) => {
     setLists(lists.filter((list) => list.id !== listId));
     setCards(cards.filter((card) => card.listId !== listId));
@@ -63,32 +67,42 @@ function App() {
 
   if (!destination) return;
 
-  const draggedCard = cards.find((card) => card.id === draggableId);
-  if (!draggedCard) return;
+  // Se soltar no mesmo lugar, não faz nada
+  if (
+    destination.droppableId === source.droppableId &&
+    destination.index === source.index
+  ) {
+    return;
+  }
 
-  const newCards = [...cards];
+  setCards((prevCards) => {
+    const draggedCard = prevCards.find((card) => card.id === draggableId);
+    if (!draggedCard) return prevCards;
 
-  // Atualiza o listId do card arrastado
-  const updatedCard = { ...draggedCard, listId: destination.droppableId };
+    // Remove o card da posição original
+    const updatedCards = prevCards.filter((card) => card.id !== draggableId);
 
-  // Remove o card da posição antiga (olha só dentro da lista antiga)
-  const filteredCards = newCards.filter((card) => card.id !== draggableId);
+    // Filtra os cards da lista de destino
+    const destinationCards = updatedCards.filter(
+      (card) => card.listId === destination.droppableId
+    );
 
-  // Encontra os cards na nova lista
-  const destinationCards = filteredCards.filter(
-    (card) => card.listId === destination.droppableId
-  );
+    // Atualiza o listId do card
+    const newCard = { ...draggedCard, listId: destination.droppableId };
 
-  // Insere o card na nova posição da nova lista
-  destinationCards.splice(destination.index, 0, updatedCard);
+    // Insere no índice correto na lista de destino
+    destinationCards.splice(destination.index, 0, newCard);
 
-  // Junta tudo: os cards que não são da lista destino + os cards da lista destino atualizados
-  const finalCards = [
-    ...filteredCards.filter((card) => card.listId !== destination.droppableId),
-    ...destinationCards,
-  ];
+    // Junta os cards que não são da lista de destino com os atualizados
+    const finalCards = [
+      ...updatedCards.filter(
+        (card) => card.listId !== destination.droppableId
+      ),
+      ...destinationCards,
+    ];
 
-  setCards(finalCards);
+    return finalCards;
+  });
 };
 
 
@@ -96,36 +110,41 @@ function App() {
     <div>
       <Header toggleTheme={toggleTheme} theme={theme} />
 
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="board">
-          {lists.map((list) => (
-            <List
-              key={list.id}
-              list={list}
-              cards={cards.filter((card) => card.listId === list.id)}
-              onAddCard={handleAddCard}
-              onDeleteList={handleDeleteList}
-              onDeleteCard={handleDeleteCard}
-            />
-          ))}
+      <div className="main">
+        <Sidebar /> {/* ⬅️ Aqui está a Sidebar */}
 
-          <div className="list">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const title = e.target.elements.title.value;
-                if (!title) return;
-                handleAddList(title);
-                e.target.reset();
-              }}
-              className="list-form"
-            >
-              <input name="title" placeholder="Nova lista" />
-              <button type="submit">Adicionar Lista</button>
-            </form>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="board">
+            {lists.map((list) => (
+              <List
+                key={list.id}
+                list={list}
+                users={users}
+                cards={cards.filter((card) => card.listId === list.id)}
+                onAddCard={handleAddCard}
+                onDeleteList={handleDeleteList}
+                onDeleteCard={handleDeleteCard}
+              />
+            ))}
+
+            <div className="list">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const title = e.target.elements.title.value;
+                  if (!title) return;
+                  handleAddList(title);
+                  e.target.reset();
+                }}
+                className="list-form"
+              >
+                <input name="title" placeholder="Nova lista" />
+                <button type="submit">Adicionar Lista</button>
+              </form>
+            </div>
           </div>
-        </div>
-      </DragDropContext>
+        </DragDropContext>
+      </div>
     </div>
   );
 }
