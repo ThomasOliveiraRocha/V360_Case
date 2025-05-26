@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from './context/AppContext';
-import { DragDropContext } from '@hello-pangea/dnd';
+//import { DragDropContext } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Header from './components/Header';
 import List from './components/List';
 import Toast from './components/Toast';
@@ -195,9 +196,18 @@ function App() {
 
 
   const handleDragEnd = (result) => {
-    const { destination, source, draggableId } = result;
+    const { destination, source, draggableId, type } = result;
 
     if (!destination) return;
+    //  Movendo listas
+    if (type === 'list') {
+      const newLists = Array.from(lists);
+      const [moved] = newLists.splice(source.index, 1);
+      newLists.splice(destination.index, 0, moved);
+      setLists(newLists);
+      return;
+    }
+
 
     // Se soltar no mesmo lugar, não faz nada
     if (
@@ -247,40 +257,60 @@ function App() {
         <Sidebar /> {/* ⬅️ Aqui está a Sidebar */}
 
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="board">
-            {lists.map((list) => (
-              <List
-                key={list.id}
-                list={list}
-                users={users}
-                cards={cards.filter((card) => card.listId === list.id)}
-                onAddCard={handleAddCard}
-                onDeleteList={handleDeleteList}
-                onDeleteCard={handleDeleteCard}
-                onAddChecklistItem={handleAddChecklistItem}
-                onDeleteChecklistItem={handleDeleteChecklistItem}
-                onToggleChecklistItem={handleToggleChecklistItem}
-                onUpdateListTitle={handleUpdateListTitle}
-                onUpdateCard={handleUpdateCard}
-              />
-            ))}
-
-            <div className="list">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const title = e.target.elements.title.value;
-                  if (!title) return;
-                  handleAddList(title);
-                  e.target.reset();
-                }}
-                className="list-form"
+          <Droppable droppableId="board" direction="horizontal" type="list">
+            {(provided) => (
+              <div
+                className="board"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
               >
-                <input name="title" placeholder="Nova lista" />
-                <button type="submit">Adicionar Lista</button>
-              </form>
-            </div>
-          </div>
+                {lists.map((list, index) => (
+                  <Draggable key={list.id} draggableId={list.id} index={index}>
+                    {(provided) => (
+                      <div
+                        className="list"
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                      >
+                        <List
+                          list={list}
+                          users={users}
+                          cards={cards.filter((card) => card.listId === list.id)}
+                          onAddCard={handleAddCard}
+                          onDeleteList={handleDeleteList}
+                          onDeleteCard={handleDeleteCard}
+                          onAddChecklistItem={handleAddChecklistItem}
+                          onDeleteChecklistItem={handleDeleteChecklistItem}
+                          onToggleChecklistItem={handleToggleChecklistItem}
+                          onUpdateListTitle={handleUpdateListTitle}
+                          onUpdateCard={handleUpdateCard}
+                          dragHandleProps={provided.dragHandleProps} // repassa pro List
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+
+                <div className="list">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const title = e.target.elements.title.value;
+                      if (!title) return;
+                      handleAddList(title);
+                      e.target.reset();
+                    }}
+                    className="list-form"
+                  >
+                    <input name="title" placeholder="Nova lista" />
+                    <button type="submit">Adicionar Lista</button>
+                  </form>
+                </div>
+
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </DragDropContext>
       </div>
       <ConfirmModal

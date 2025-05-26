@@ -14,6 +14,7 @@ export default function List({
   onAddChecklistItem,
   onDeleteChecklistItem,
   onToggleChecklistItem,
+  dragHandleProps,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(list.title);
@@ -36,6 +37,12 @@ export default function List({
 
   return (
     <div className="list">
+      {/* Handle de arrastar */}
+      <div className="list-header" {...dragHandleProps}>
+        <div className="drag-handle" title="Arrastar lista"></div>
+      </div>
+
+      {/* Header da lista com título e botões */}
       <div className="list-header">
         {isEditing ? (
           <input
@@ -67,6 +74,7 @@ export default function List({
           </button>
         </div>
       </div>
+
 
       <Droppable droppableId={list.id}>
         {(provided) => (
