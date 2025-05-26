@@ -1,4 +1,7 @@
 Banco:
+pip install Flask-Migrate
+flask db init
+
 # Acesse o psql
 psql -U postgres
 
@@ -6,8 +9,12 @@ psql -U postgres
 CREATE DATABASE v360_db;
 
 # (opcional) Crie um usuário específico
-CREATE USER v360_user WITH PASSWORD 'sua_senha';
+CREATE USER v360_user WITH PASSWORD 'V360';
 GRANT ALL PRIVILEGES ON DATABASE v360_db TO v360_user;
+\c v360_db
+
+GRANT ALL ON SCHEMA public TO v360_user;
+
 
 Back:
 

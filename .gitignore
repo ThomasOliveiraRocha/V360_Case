@@ -5,3 +5,7 @@ __pycache__/
 *.db
 .env
 **/node_modules/
+venv/
+env/
+*.log
+.vscode/

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const PORT = 3000;
+import './seed.js';
 
 app.use(cors()); // Permite requests do frontend em outra porta/domínio
 app.use(express.json()); // Para ler JSON do body

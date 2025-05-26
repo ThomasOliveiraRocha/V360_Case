@@ -8,6 +8,9 @@ import Toast from './components/Toast';
 import ConfirmModal from './components/ConfirmModal';
 import Sidebar from './components/Sidebar';
 import './index.css';
+import { fetchLists, createList } from './services/api';
+
+
 
 function App() {
   const { users } = useAppContext();
@@ -28,15 +31,19 @@ function App() {
   ]);
 
   const [cards, setCards] = useState([
-    { id: 'card-1', text: 'Criar interface', listId: 'list-1', assignedUser: 'Thomas' },
-    { id: 'card-2', text: 'Fazer backend', listId: 'list-2', assignedUser: 'Larissa' },
-    { id: 'card-3', text: 'Testar', listId: 'list-3', assignedUser: '' },
+    { id: 'card-1', title: 'Criar interface', listId: 'list-1', assignedUser: 'Thomas' },
+    { id: 'card-2', title: 'Fazer backend', listId: 'list-2', assignedUser: 'Larissa' },
+    { id: 'card-3', title: 'Testar', listId: 'list-3', assignedUser: '' },
   ]);
 
-  // 🌙 Tema
   useEffect(() => {
-    document.body.className = theme === 'dark' ? 'dark' : '';
-  }, [theme]);
+  document.body.className = theme === 'dark' ? 'dark' : '';
+}, [theme]);
+
+
+  useEffect(() => {
+  fetchLists().then(setLists);
+}, []);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -60,18 +67,20 @@ function App() {
     showToast('✅ Card criado com sucesso!', 'success');
   };
   // ➕ Adicionar Lista
-  const handleAddList = (title) => {
-    if (lists.find((l) => l.title === title)) {
-      showToast('❌ Já existe uma lista com esse nome!', 'error');
-      return;
-    }
-    const newList = {
-      id: `list-${Date.now()}`,
-      title,
-    };
+  const handleAddList = async (title) => {
+  if (lists.find((l) => l.title === title)) {
+    showToast('❌ Já existe uma lista com esse nome!', 'error');
+    return;
+  }
+  try {
+    const newList = await createList(title);
     setLists([...lists, newList]);
     showToast('✅ Lista criada com sucesso!', 'success');
-  };
+  } catch {
+    showToast('❌ Erro ao criar lista!', 'error');
+  }
+};
+
 
   // 🗑️ Deletar Lista
   const handleDeleteList = (listId) => {
