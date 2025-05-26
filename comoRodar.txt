@@ -1,4 +1,16 @@
+Banco:
+# Acesse o psql
+psql -U postgres
+
+# Crie o banco
+CREATE DATABASE v360_db;
+
+# (opcional) Crie um usuário específico
+CREATE USER v360_user WITH PASSWORD 'sua_senha';
+GRANT ALL PRIVILEGES ON DATABASE v360_db TO v360_user;
+
 Back:
+
 python -m venv venv 
 .\venv\Scripts\activate
 python app.py 
