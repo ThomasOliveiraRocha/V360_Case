@@ -1,9 +1,46 @@
 import React, { createContext, useContext, useState } from 'react';
+import ConfirmModal from '../components/ConfirmModal';
 
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
   const [users, setUsers] = useState(['Thomas', 'Larissa']);
+  const [toast, setToast] = useState({ message: '', type: '' });
+  const [confirmData, setConfirmData] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => { }
+  });
+
+
+
+  // Modal de confirmação
+  // 🧠 Função genérica para abrir o modal
+  const openConfirm = (title, message, onConfirm) => {
+    setConfirmData({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
+
+  // 🧠 Fecha o modal
+  const closeConfirm = () => {
+    setConfirmData({ ...confirmData, isOpen: false });
+  };
+
+  //Mensagens de erro
+  const showToast = (message, type = 'error') => {
+    setToast({ message, type });
+  };
+
+  const clearToast = () => {
+    setToast({ message: '', type: '' });
+  };
+
+  //Listas
   const [lists, setLists] = useState([
     {
       id: Date.now(),
@@ -32,32 +69,43 @@ export function AppProvider({ children }) {
   // Usuários
   const addUser = (name) => {
     if (users.includes(name)) {
-      alert('Usuário já existe!');
+      showToast('❌ Usuário já existe!', 'error');
       return;
     }
     setUsers((prev) => [...prev, name]);
+    showToast('✅ Usuário adicionado!', 'success');
   };
 
   const deleteUser = (name) => {
-    if (window.confirm(`Excluir usuário ${name}?`)) {
-      setUsers((prev) => prev.filter((u) => u !== name));
-    }
+    openConfirm(
+      'Excluir Usuário',
+      'Tem certeza que deseja excluir este Usuário?',
+      () => {
+        setUsers((prev) => prev.filter((u) => u !== name));
+        showToast('🗑️ Usuário excluído!', 'info');
+        closeConfirm();
+      }
+    );
+
   };
+
+
 
   // Listas
   const addList = (title) => {
     if (lists.find((l) => l.title === title)) {
-      alert('Lista já existe!');
+      showToast('❌ Lista já existe!', 'error');
       return;
     }
     const newList = { id: Date.now(), title, cards: [] };
     setLists((prev) => [...prev, newList]);
+    showToast('✅ Lista criada!', 'success');
   };
 
   const deleteList = (id) => {
-    if (window.confirm('Tem certeza que deseja excluir essa lista?')) {
-      setLists((prev) => prev.filter((l) => l.id !== id));
-    }
+
+    setLists((prev) => prev.filter((l) => l.id !== id));
+    showToast('🗑️ Lista excluída!', 'info');
   };
 
   const moveList = (sourceIndex, targetIndex) => {
@@ -75,7 +123,7 @@ export function AppProvider({ children }) {
       prev.map((list) => {
         if (list.id === listId) {
           if (list.cards.find((c) => c.text === text)) {
-            alert('Já existe um card com esse nome nessa lista!');
+            showToast('❌ Lista já existe!', 'error');
             return list;
           }
           return {
@@ -97,15 +145,16 @@ export function AppProvider({ children }) {
   };
 
   const deleteCard = (listId, cardId) => {
-    if (window.confirm('Deseja excluir esse card?')) {
-      setLists((prev) =>
-        prev.map((list) =>
-          list.id === listId
-            ? { ...list, cards: list.cards.filter((card) => card.id !== cardId) }
-            : list
-        )
-      );
-    }
+
+    setLists((prev) =>
+      prev.map((list) =>
+        list.id === listId
+          ? { ...list, cards: list.cards.filter((card) => card.id !== cardId) }
+          : list
+      )
+    );
+    showToast('🗑️ Card excluído!', 'info');
+
   };
 
   const updateCardUser = (listId, cardId, user) => {
@@ -113,11 +162,11 @@ export function AppProvider({ children }) {
       prev.map((list) =>
         list.id === listId
           ? {
-              ...list,
-              cards: list.cards.map((card) =>
-                card.id === cardId ? { ...card, assignedUser: user } : card
-              ),
-            }
+            ...list,
+            cards: list.cards.map((card) =>
+              card.id === cardId ? { ...card, assignedUser: user } : card
+            ),
+          }
           : list
       )
     );
@@ -153,9 +202,23 @@ export function AppProvider({ children }) {
         updateCardUser,
         moveCard,
         moveList,
+        showToast,
+        clearToast,
+        toast,
+        openConfirm,
+        closeConfirm,
+        confirmData,
       }}
     >
       {children}
+      {/* 🔥 Modal de confirmação global */}
+      <ConfirmModal
+        isOpen={confirmData.isOpen}
+        title={confirmData.title}
+        message={confirmData.message}
+        onConfirm={confirmData.onConfirm}
+        onCancel={closeConfirm}
+      />
     </AppContext.Provider>
   );
 }

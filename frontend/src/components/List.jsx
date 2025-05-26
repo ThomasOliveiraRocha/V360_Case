@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import Card from './Card';
 
@@ -9,8 +9,15 @@ export default function List({
   onAddCard,
   onDeleteList,
   onDeleteCard,
+  onUpdateListTitle,
   onUpdateCard,
+  onAddChecklistItem,
+  onDeleteChecklistItem,
+  onToggleChecklistItem,
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newTitle, setNewTitle] = useState(list.title);
+
   const handleAddCard = (e) => {
     e.preventDefault();
     const text = e.target.elements.text.value;
@@ -20,46 +27,76 @@ export default function List({
     e.target.reset();
   };
 
+  const handleSaveTitle = () => {
+    if (newTitle.trim()) {
+      onUpdateListTitle(list.id, newTitle.trim());
+      setIsEditing(false);
+    }
+  };
+
   return (
     <div className="list">
       <div className="list-header">
-        <h3>{list.title}</h3>
-        <button
-          onClick={() => onDeleteList(list.id)}
-          className="delete-button"
-          title="Excluir lista"
-        >
-          &times;
-        </button>
+        {isEditing ? (
+          <input
+            className="edit-input"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            onBlur={handleSaveTitle}
+            onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
+            autoFocus
+          />
+        ) : (
+          <h3>{list.title}</h3>
+        )}
+
+        <div>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="edit-button"
+            title="Editar lista"
+          >
+            ✏️
+          </button>
+          <button
+            onClick={() => onDeleteList(list.id)}
+            className="delete-button"
+            title="Excluir lista"
+          >
+            &times;
+          </button>
+        </div>
       </div>
 
       <Droppable droppableId={list.id}>
-  {(provided) => (
-    <div
-      ref={provided.innerRef}
-      {...provided.droppableProps}
-      className="card-container"
-    >
-      {cards.length === 0 && (
-        <div className="empty-message">Solte um card aqui</div>
-      )}
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className="card-container"
+          >
+            {cards.length === 0 && (
+              <div className="empty-message">Solte um card aqui</div>
+            )}
 
-      {cards.map((card, index) => (
-        <Card
-          key={card.id}
-          users={users}
-          card={card}
-          index={index}
-          onDelete={() => onDeleteCard(card.id)}
-          onUpdate={onUpdateCard}
-        />
-      ))}
+            {cards.map((card, index) => (
+              <Card
+                key={card.id}
+                users={users}
+                card={card}
+                index={index}
+                onDelete={() => onDeleteCard(card.id)}
+                onUpdate={onUpdateCard}
+                onAddChecklistItem={onAddChecklistItem}
+                onDeleteChecklistItem={onDeleteChecklistItem}
+                onToggleChecklistItem={onToggleChecklistItem}
+              />
+            ))}
 
-      {provided.placeholder}
-    </div>
-  )}
-</Droppable>
-
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
 
       <form onSubmit={handleAddCard} className="card-form">
         <input name="text" placeholder="Novo card" />
