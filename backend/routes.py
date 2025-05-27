@@ -1,18 +1,23 @@
 from flask import Blueprint, request, jsonify
-from models import db, List, Card, ActionHistory, User, ChecklistItem
+from models import db, List, Card, ChecklistItem, User, ActionHistory
 from datetime import datetime
-
-
-
 
 api_bp = Blueprint('api', __name__)
 
-def log_action(user, action):
-    history = ActionHistory(user=user, action=action, timestamp=datetime.utcnow())
+
+def log_action(user, action, resource_id=None, resource_type=None):
+    history = ActionHistory(
+        user=user,
+        action=action,
+        timestamp=datetime.utcnow(),
+        resource_id=resource_id,
+        resource_type=resource_type
+    )
     db.session.add(history)
     db.session.commit()
 
-# 🔸 Rotas de Listas
+
+# 🔸 Listas
 @api_bp.route('/lists', methods=['GET'])
 def get_lists():
     lists = List.query.all()
@@ -25,13 +30,15 @@ def get_lists():
                     'id': c.id,
                     'title': c.title,
                     'description': c.description,
-                    'assigned_user': c.assigned_user,
+                    'assigned_user_id': c.assigned_user_id,
+                    'assigned_user_name': c.assigned_user.name if c.assigned_user else None,
                     'checklist': [
                         {
                             'id': item.id,
                             'text': item.text,
                             'done': item.done,
-                            'assigned_user': item.assigned_user
+                            'assigned_user_id': item.assigned_user_id,
+                            'assigned_user_name': item.assigned_user.name if item.assigned_user else None
                         } for item in c.checklist_items
                     ]
                 } for c in l.cards
@@ -44,6 +51,8 @@ def get_lists():
 def create_list():
     data = request.json
     title = data.get('title')
+    user = data.get('user', 'Sistema')
+
     if not title:
         return jsonify({'error': 'Title is required'}), 400
 
@@ -51,7 +60,7 @@ def create_list():
     db.session.add(new_list)
     db.session.commit()
 
-    log_action(data.get('user', 'Sistema'), f"Criou a lista '{title}'")
+    log_action(user, f"Criou a lista '{title}'", new_list.id, 'list')
 
     return jsonify({'id': new_list.id, 'title': new_list.title}), 201
 
@@ -59,59 +68,98 @@ def create_list():
 @api_bp.route('/lists/<int:list_id>', methods=['DELETE'])
 def delete_list(list_id):
     data = request.json
+    user = data.get('user', 'Sistema')
+
     lista = List.query.get_or_404(list_id)
     db.session.delete(lista)
     db.session.commit()
-    log_action(data.get('user', 'Sistema'), f"Deletou a lista {lista.title}")
+
+    log_action(user, f"Deletou a lista '{lista.title}'", list_id, 'list')
+
     return jsonify({'message': 'List deleted'})
 
-# 🔸 Rotas de Cards
+
+# 🔸 Cards
 @api_bp.route('/lists/<int:list_id>/cards', methods=['POST'])
 def add_card(list_id):
     data = request.json
+    user = data.get('user', 'Sistema')
+
+    if not data.get('title'):
+        return jsonify({'error': 'Title is required'}), 400
+
     card = Card(
         title=data['title'],
         description=data.get('description', ''),
-        assigned_user=data.get('assigned_user', 'Não atribuído'),
+        assigned_user_id=data.get('assigned_user_id'),
         list_id=list_id
     )
     db.session.add(card)
     db.session.commit()
-    log_action(data.get('user', 'Sistema'), f"Adicionou o card '{card.title}' na lista {list_id}")
+
+    log_action(user, f"Adicionou o card '{card.title}' na lista {list_id}", card.id, 'card')
+
     return jsonify({
         'id': card.id,
         'title': card.title,
         'description': card.description,
-        'assigned_user': card.assigned_user
+        'assigned_user_id': card.assigned_user_id
     })
+
+@api_bp.route('/cards', methods=['GET'])
+def get_cards():
+    cards = Card.query.all()
+    return jsonify([
+        {
+            'id': c.id,
+            'title': c.title,
+            'description': c.description,
+            'list_id': c.list_id,
+            'list_title': c.lista.title if c.lista else None,
+            'assigned_user_id': c.assigned_user_id,
+            'assigned_user_name': c.assigned_user.name if c.assigned_user else None,
+            'checklist': [
+                {
+                    'id': item.id,
+                    'text': item.text,
+                    'done': item.done,
+                    'assigned_user_id': item.assigned_user_id,
+                    'assigned_user_name': item.assigned_user.name if item.assigned_user else None
+                } for item in c.checklist_items
+            ]
+        } for c in cards
+    ])
+
+
 
 @api_bp.route('/cards/<int:card_id>', methods=['PUT'])
 def update_card(card_id):
     data = request.json
-    card = Card.query.get_or_404(card_id)
+    user = data.get('user', 'Sistema')
 
+    card = Card.query.get_or_404(card_id)
     old_list = card.list_id
     new_list = data.get('new_list_id', old_list)
 
     card.title = data.get('title', card.title)
     card.description = data.get('description', card.description)
-    card.assigned_user = data.get('assigned_user', card.assigned_user)
+    card.assigned_user_id = data.get('assigned_user_id', card.assigned_user_id)
     card.list_id = new_list
 
     db.session.commit()
 
-    log_action(
-        data.get('user', 'Sistema'),
-        f"Atualizou o card '{card.title}' (mudou de lista {old_list} para {new_list})"
-        if old_list != new_list
-        else f"Atualizou o card '{card.title}'"
+    action_message = (
+        f"Atualizou o card '{card.title}' (mudou da lista {old_list} para {new_list})"
+        if old_list != new_list else
+        f"Atualizou o card '{card.title}'"
     )
+    log_action(user, action_message, card.id, 'card')
 
     return jsonify({
         'id': card.id,
         'title': card.title,
         'description': card.description,
-        'assigned_user': card.assigned_user,
+        'assigned_user_id': card.assigned_user_id,
         'list_id': card.list_id
     })
 
@@ -119,32 +167,130 @@ def update_card(card_id):
 @api_bp.route('/cards/<int:card_id>', methods=['DELETE'])
 def delete_card(card_id):
     data = request.json
+    user = data.get('user', 'Sistema')
+
     card = Card.query.get_or_404(card_id)
     db.session.delete(card)
     db.session.commit()
-    log_action(data.get('user', 'Sistema'), f"Deletou o card '{card.title}'")
+
+    log_action(user, f"Deletou o card '{card.title}'", card_id, 'card')
+
     return jsonify({'message': 'Card deleted'})
+
+
+# 🔸 Checklist
+@api_bp.route('/cards/<int:card_id>/checklist', methods=['POST'])
+def add_checklist_item(card_id):
+    data = request.json
+    user = data.get('user', 'Sistema')
+
+    if not data.get('text'):
+        return jsonify({'error': 'Texto é obrigatório'}), 400
+
+    item = ChecklistItem(
+        text=data['text'],
+        done=False,
+        card_id=card_id,
+        assigned_user_id=data.get('assigned_user_id')
+    )
+    db.session.add(item)
+    db.session.commit()
+
+    log_action(user, f"Adicionou o item '{item.text}' no checklist do card {card_id}", card_id, 'checklist')
+
+    return jsonify({
+        'id': item.id,
+        'text': item.text,
+        'done': item.done,
+        'assigned_user_id': item.assigned_user_id
+    }), 201
+
+
+@api_bp.route('/checklist/<int:item_id>', methods=['PUT'])
+def update_checklist_item(item_id):
+    data = request.json
+    user = data.get('user', 'Sistema')
+
+    item = ChecklistItem.query.get_or_404(item_id)
+    item.text = data.get('text', item.text)
+    item.done = data.get('done', item.done)
+    item.assigned_user_id = data.get('assigned_user_id', item.assigned_user_id)
+
+    db.session.commit()
+
+    log_action(user, f"Atualizou o item '{item.text}' do checklist", item.card_id, 'checklist')
+
+    return jsonify({
+        'id': item.id,
+        'text': item.text,
+        'done': item.done,
+        'assigned_user_id': item.assigned_user_id
+    })
+
+
+@api_bp.route('/checklist/<int:item_id>', methods=['DELETE'])
+def delete_checklist_item(item_id):
+    data = request.json
+    user = data.get('user', 'Sistema')
+
+    item = ChecklistItem.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+
+    log_action(user, f"Removeu o item '{item.text}' do checklist", item.card_id, 'checklist')
+
+    return jsonify({'message': 'Checklist item deleted'})
+
 
 # 🔸 Histórico de ações
 @api_bp.route('/history', methods=['GET'])
 def get_history():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
+    user = request.args.get('user')
+    resource_type = request.args.get('resource_type')
 
-    history_paginated = ActionHistory.query.order_by(ActionHistory.timestamp.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    query = ActionHistory.query
+
+    if user:
+        query = query.filter(ActionHistory.user == user)
+
+    if resource_type:
+        query = query.filter(ActionHistory.resource_type == resource_type)
+
+    history_paginated = query.order_by(ActionHistory.timestamp.desc()).paginate(
+        page=page, per_page=per_page, error_out=False)
+
+    def get_resource_name(resource_type, resource_id):
+        if resource_type == 'card':
+            card = Card.query.get(resource_id)
+            return card.title if card else None
+        elif resource_type == 'list':
+            lista = List.query.get(resource_id)
+            return lista.title if lista else None
+        elif resource_type == 'checklist':
+            item = ChecklistItem.query.get(resource_id)
+            return item.text if item else None
+        else:
+            return None
 
     return jsonify({
         'items': [
             {
                 'user': h.user,
                 'action': h.action,
-                'timestamp': h.timestamp.isoformat()
+                'timestamp': h.timestamp.isoformat(),
+                'resource_type': h.resource_type,
+                'resource_id': h.resource_id,
+                'resource_name': get_resource_name(h.resource_type, h.resource_id)
             } for h in history_paginated.items
         ],
         'total': history_paginated.total,
         'page': history_paginated.page,
         'pages': history_paginated.pages
     })
+
+
 
 
 # 🔸 Usuários
@@ -155,76 +301,12 @@ def users():
         return jsonify([{'id': u.id, 'name': u.name} for u in users])
     else:
         data = request.json
-        user = User(name=data['name'])
+        name = data.get('name')
+
+        if not name:
+            return jsonify({'error': 'Name is required'}), 400
+
+        user = User(name=name)
         db.session.add(user)
         db.session.commit()
         return jsonify({'id': user.id, 'name': user.name})
-
-@api_bp.route('/cards/<int:card_id>/checklist', methods=['GET'])
-def get_checklist(card_id):
-    items = ChecklistItem.query.filter_by(card_id=card_id).all()
-    return jsonify([
-        {
-            'id': item.id,
-            'text': item.text,
-            'done': item.done,
-            'assigned_user': item.assigned_user
-        } for item in items
-    ])
-    
-@api_bp.route('/cards/<int:card_id>/checklist', methods=['POST'])
-def add_checklist_item(card_id):
-    data = request.json
-    text = data.get('text')
-    assigned_user = data.get('assigned_user')
-
-    if not text:
-        return jsonify({'error': 'Texto é obrigatório'}), 400
-
-    item = ChecklistItem(
-        text=text,
-        done=False,
-        card_id=card_id,
-        assigned_user=assigned_user
-    )
-    db.session.add(item)
-    db.session.commit()
-
-    log_action(data.get('user', 'Sistema'), f"Adicionou o item '{text}' no checklist do card {card_id}")
-
-    return jsonify({
-        'id': item.id,
-        'text': item.text,
-        'done': item.done,
-        'assigned_user': item.assigned_user
-    }), 201
-    
-@api_bp.route('/checklist/<int:item_id>', methods=['DELETE'])
-def delete_checklist_item(item_id):
-    item = ChecklistItem.query.get_or_404(item_id)
-    db.session.delete(item)
-    db.session.commit()
-    log_action('Sistema', f"Removeu o item '{item.text}' do checklist")
-    return jsonify({'message': 'Checklist item deleted'})
-
-
-@api_bp.route('/checklist/<int:item_id>', methods=['PUT'])
-def update_checklist_item(item_id):
-    data = request.json
-    item = ChecklistItem.query.get_or_404(item_id)
-
-    item.text = data.get('text', item.text)
-    item.done = data.get('done', item.done)
-    item.assigned_user = data.get('assigned_user', item.assigned_user)
-
-    db.session.commit()
-
-    log_action(data.get('user', 'Sistema'), f"Atualizou o item '{item.text}' do checklist")
-
-    return jsonify({
-        'id': item.id,
-        'text': item.text,
-        'done': item.done,
-        'assigned_user': item.assigned_user
-    })
-

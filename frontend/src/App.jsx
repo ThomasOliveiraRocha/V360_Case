@@ -37,13 +37,13 @@ function App() {
   ]);
 
   useEffect(() => {
-  document.body.className = theme === 'dark' ? 'dark' : '';
-}, [theme]);
+    document.body.className = theme === 'dark' ? 'dark' : '';
+  }, [theme]);
 
 
   useEffect(() => {
-  fetchLists().then(setLists);
-}, []);
+    fetchLists().then(setLists);
+  }, []);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -63,23 +63,24 @@ function App() {
       listId,
       assignedUser,
     };
+
     setCards([...cards, newCard]);
     showToast('✅ Card criado com sucesso!', 'success');
   };
   // ➕ Adicionar Lista
   const handleAddList = async (title) => {
-  if (lists.find((l) => l.title === title)) {
-    showToast('❌ Já existe uma lista com esse nome!', 'error');
-    return;
-  }
-  try {
-    const newList = await createList(title);
-    setLists([...lists, newList]);
-    showToast('✅ Lista criada com sucesso!', 'success');
-  } catch {
-    showToast('❌ Erro ao criar lista!', 'error');
-  }
-};
+    if (lists.find((l) => l.title === title)) {
+      showToast('❌ Já existe uma lista com esse nome!', 'error');
+      return;
+    }
+    try {
+      const newList = await createList(title);
+      setLists([...lists, newList]);
+      showToast('✅ Lista criada com sucesso!', 'success');
+    } catch {
+      showToast('❌ Erro ao criar lista!', 'error');
+    }
+  };
 
 
   // 🗑️ Deletar Lista

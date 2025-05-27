@@ -123,7 +123,7 @@ export function AppProvider({ children }) {
       prev.map((list) => {
         if (list.id === listId) {
           if (list.cards.find((c) => c.text === text)) {
-            showToast('❌ Lista já existe!', 'error');
+            showToast('❌ Card já existe!', 'error');
             return list;
           }
           return {
