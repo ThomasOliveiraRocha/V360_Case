@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import Card from './Card';
 
+import ConfirmModal from '../components/ConfirmModal';
+
 export default function List({
   list,
-  cards,
+  cards = [],
   users = [],
   onAddCard,
   onDeleteList,
@@ -13,18 +15,38 @@ export default function List({
   onUpdateCard,
   onAddChecklistItem,
   onDeleteChecklistItem,
-  onToggleChecklistItem,
   dragHandleProps,
+  onAssignUser,
+  onAssignUserToChecklistItem,
+  onToggleChecklistItem,
+
+
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(list.title);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = () => {
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await onDeleteList(list.id);
+
+    } catch (error) {
+      console.error('Erro ao deletar lista:', error);
+    } finally {
+      setIsModalOpen(false);
+    }
+  };
 
   const handleAddCard = (e) => {
     e.preventDefault();
     const text = e.target.elements.text.value;
     const assignedUser = e.target.elements.assignedUser.value;
     if (!text) return;
-    onAddCard(list.id, text, assignedUser || 'Não atribuído');
+    onAddCard(list.id, text, assignedUser ? parseInt(assignedUser) : null);
     e.target.reset();
   };
 
@@ -37,12 +59,10 @@ export default function List({
 
   return (
     <div className="list">
-      {/* Handle de arrastar */}
       <div className="list-header" {...dragHandleProps}>
         <div className="drag-handle" title="Arrastar lista"></div>
       </div>
 
-      {/* Header da lista com título e botões */}
       <div className="list-header">
         {isEditing ? (
           <input
@@ -66,7 +86,7 @@ export default function List({
             ✏️
           </button>
           <button
-            onClick={() => onDeleteList(list.id)}
+            onClick={handleDelete}
             className="delete-button"
             title="Excluir lista"
           >
@@ -75,8 +95,7 @@ export default function List({
         </div>
       </div>
 
-
-      <Droppable droppableId={list.id}>
+      <Droppable droppableId={`list-${list.id}`} type="card">
         {(provided) => (
           <div
             ref={provided.innerRef}
@@ -89,7 +108,7 @@ export default function List({
 
             {cards.map((card, index) => (
               <Card
-                key={card.id}
+                key={`card-${card.id}`}
                 users={users}
                 card={card}
                 index={index}
@@ -98,6 +117,8 @@ export default function List({
                 onAddChecklistItem={onAddChecklistItem}
                 onDeleteChecklistItem={onDeleteChecklistItem}
                 onToggleChecklistItem={onToggleChecklistItem}
+                onAssignUser={onAssignUser}
+                onAssignUserToChecklistItem={onAssignUserToChecklistItem}
               />
             ))}
 
@@ -106,6 +127,15 @@ export default function List({
         )}
       </Droppable>
 
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir a lista "${list.title}"? Todos os cards dentro dela também serão excluídos.`}
+        onConfirm={confirmDelete}
+        onCancel={() => setIsModalOpen(false)}
+      />
+
       <form onSubmit={handleAddCard} className="card-form">
         <input name="text" placeholder="Novo card" />
 
@@ -113,8 +143,8 @@ export default function List({
           <option value="">Atribuir usuário</option>
           {users.length > 0 ? (
             users.map((user) => (
-              <option key={user} value={user}>
-                👤 {user}
+              <option key={user.id} value={user.id}>
+                👤 {user.name}
               </option>
             ))
           ) : (

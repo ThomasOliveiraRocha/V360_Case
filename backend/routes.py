@@ -20,7 +20,7 @@ def log_action(user, action, resource_id=None, resource_type=None):
 # 🔸 Listas
 @api_bp.route('/lists', methods=['GET'])
 def get_lists():
-    lists = List.query.all()
+    lists = List.query.order_by(List.position).all()
     return jsonify([
         {
             'id': l.id,
@@ -45,6 +45,49 @@ def get_lists():
             ]
         } for l in lists
     ])
+    
+@api_bp.route('/lists/<int:list_id>/move', methods=['PUT'])
+def move_list(list_id):
+    data = request.json
+    user = data.get('user', 'Sistema')
+    new_position = data.get('new_position')
+
+    if new_position is None:
+        return jsonify({'error': 'Nova posição é obrigatória'}), 400
+
+    lista = List.query.get_or_404(list_id)
+
+    lists = List.query.order_by(List.position).all()
+
+    lists.remove(lista)
+
+    lists.insert(new_position, lista)
+
+    for index, l in enumerate(lists):
+        l.position = index
+
+    db.session.commit()
+
+    log_action(user, f"Moveu a lista '{lista.title}' para a posição {new_position}", lista.id, 'list')
+
+    return jsonify({'message': 'Lista movida com sucesso'})
+
+@api_bp.route('/cards/<int:card_id>/move', methods=['PUT'])
+def move_card(card_id):
+    data = request.get_json()
+    new_list_id = data.get('list_id')
+
+    if not new_list_id:
+        return jsonify({'error': 'list_id é obrigatório'}), 400
+
+    card = Card.query.get_or_404(card_id)
+    card.list_id = new_list_id
+    db.session.commit()
+
+    return jsonify({'message': 'Card movido com sucesso', 'card_id': card.id, 'new_list_id': new_list_id})
+
+
+
 
 
 @api_bp.route('/lists', methods=['POST'])
@@ -64,19 +107,40 @@ def create_list():
 
     return jsonify({'id': new_list.id, 'title': new_list.title}), 201
 
-
-@api_bp.route('/lists/<int:list_id>', methods=['DELETE'])
-def delete_list(list_id):
+@api_bp.route('/lists/<int:list_id>', methods=['PUT'])
+def update_list(list_id):
     data = request.json
     user = data.get('user', 'Sistema')
 
     lista = List.query.get_or_404(list_id)
+    old_title = lista.title
+
+    lista.title = data.get('title', lista.title)
+    db.session.commit()
+
+    log_action(user, f"Renomeou a lista de '{old_title}' para '{lista.title}'", list_id, 'list')
+
+    return jsonify({'id': lista.id, 'title': lista.title})
+
+
+
+@api_bp.route('/lists/<int:list_id>', methods=['DELETE'])
+def delete_list(list_id):
+    user = request.args.get('user', 'Sistema')
+
+    lista = List.query.get(list_id)
+    if not lista:
+        return jsonify({'error': 'List not found'}), 404
+
     db.session.delete(lista)
     db.session.commit()
 
     log_action(user, f"Deletou a lista '{lista.title}'", list_id, 'list')
 
     return jsonify({'message': 'List deleted'})
+
+
+
 
 
 # 🔸 Cards
@@ -166,16 +230,20 @@ def update_card(card_id):
 
 @api_bp.route('/cards/<int:card_id>', methods=['DELETE'])
 def delete_card(card_id):
-    data = request.json
-    user = data.get('user', 'Sistema')
+    user = request.args.get('user', 'Sistema')
 
-    card = Card.query.get_or_404(card_id)
+    card = Card.query.get(card_id)
+    if not card:
+        return jsonify({'message': 'Card já não existia'}), 200  # ✅ Retorna 200
+
     db.session.delete(card)
     db.session.commit()
 
     log_action(user, f"Deletou o card '{card.title}'", card_id, 'card')
 
-    return jsonify({'message': 'Card deleted'})
+    return jsonify({'message': 'Card deletado'})
+
+
 
 
 # 🔸 Checklist
@@ -213,7 +281,8 @@ def update_checklist_item(item_id):
 
     item = ChecklistItem.query.get_or_404(item_id)
     item.text = data.get('text', item.text)
-    item.done = data.get('done', item.done)
+    item.done = bool(data.get('done', item.done))
+
     item.assigned_user_id = data.get('assigned_user_id', item.assigned_user_id)
 
     db.session.commit()
@@ -230,8 +299,7 @@ def update_checklist_item(item_id):
 
 @api_bp.route('/checklist/<int:item_id>', methods=['DELETE'])
 def delete_checklist_item(item_id):
-    data = request.json
-    user = data.get('user', 'Sistema')
+    user = request.args.get('user', 'Sistema')
 
     item = ChecklistItem.query.get_or_404(item_id)
     db.session.delete(item)
@@ -239,7 +307,8 @@ def delete_checklist_item(item_id):
 
     log_action(user, f"Removeu o item '{item.text}' do checklist", item.card_id, 'checklist')
 
-    return jsonify({'message': 'Checklist item deleted'})
+    return jsonify({'message': 'Checklist item deletado'})
+
 
 
 # 🔸 Histórico de ações
@@ -310,3 +379,24 @@ def users():
         db.session.add(user)
         db.session.commit()
         return jsonify({'id': user.id, 'name': user.name})
+
+@api_bp.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    # 🔸 Remove a referência do usuário em cards
+    cards = Card.query.filter_by(assigned_user_id=user.id).all()
+    for card in cards:
+        card.assigned_user_id = None
+
+    # 🔸 Remove a referência do usuário em checklist items
+    items = ChecklistItem.query.filter_by(assigned_user_id=user.id).all()
+    for item in items:
+        item.assigned_user_id = None
+
+    db.session.delete(user)
+    db.session.commit()
+
+    log_action('Sistema', f"Deletou o usuário '{user.name}'", user_id, 'user')
+
+    return jsonify({'message': f'Usuário {user.name} deletado com sucesso'})

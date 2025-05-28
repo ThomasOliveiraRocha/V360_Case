@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 
-export default function Checklist({ card, onAdd, onDelete, onToggle }) {
+export default function Checklist({ card, onAdd, onDelete, onToggle, onAssignUserToItem }) {
   const { users } = useAppContext();
+
   const [text, setText] = useState('');
   const [assignedUser, setAssignedUser] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -11,11 +12,20 @@ export default function Checklist({ card, onAdd, onDelete, onToggle }) {
     e.preventDefault();
     if (!text.trim()) return;
 
-    const userToAssign = assignedUser || 'Não atribuído';
-    onAdd(card.listId, card.id, text.trim(), userToAssign);
+    onAdd(card.id, text.trim(), assignedUser || null);
     setText('');
     setAssignedUser('');
-    setShowForm(false); // esconde o formulário após adicionar
+    setShowForm(false);
+  };
+
+  const handleToggle = (item) => {
+
+
+    onToggle(card.id, item.id, { done: !item.done });
+  };
+
+  const handleDelete = (item) => {
+    onDelete(card.id, item.id);
   };
 
   return (
@@ -26,13 +36,13 @@ export default function Checklist({ card, onAdd, onDelete, onToggle }) {
             <input
               type="checkbox"
               checked={item.done}
-              onChange={() => onToggle(card.listId, card.id, item.id)}
+              onChange={() => handleToggle(item)}
             />
             <span className={item.done ? 'done' : ''}>
-              {item.text} {item.assignedUser && `(${item.assignedUser})`}
+              {item.text} {item.assigned_user_id && `(${users.find(u => u.id === item.assigned_user_id)?.name || 'Não atribuído'})`}
             </span>
             <button
-              onClick={() => onDelete(card.listId, card.id, item.id)}
+              onClick={() => handleDelete(item)}
               className="delete-button"
               title="Remover"
             >
@@ -52,6 +62,7 @@ export default function Checklist({ card, onAdd, onDelete, onToggle }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Novo subitem"
+            required
           />
 
           <select
@@ -61,8 +72,8 @@ export default function Checklist({ card, onAdd, onDelete, onToggle }) {
             <option value="">Atribuir usuário</option>
             {users.length > 0 ? (
               users.map((user) => (
-                <option key={user} value={user}>
-                  👤 {user}
+                <option key={user.id} value={user.id}>
+                  {user.name}
                 </option>
               ))
             ) : (
@@ -72,7 +83,9 @@ export default function Checklist({ card, onAdd, onDelete, onToggle }) {
 
           <div className="subitem-buttons">
             <button type="submit">Adicionar</button>
-            <button type="button" onClick={() => setShowForm(false)}>Cancelar</button>
+            <button type="button" onClick={() => setShowForm(false)}>
+              Cancelar
+            </button>
           </div>
         </form>
       )}

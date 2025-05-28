@@ -8,7 +8,9 @@ class List(db.Model):
     __tablename__ = 'lists'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
+    position = db.Column(db.Integer, nullable=False, default=0)  # <- posição da lista
     cards = db.relationship('Card', backref='list', cascade='all, delete-orphan', lazy=True)
+
 
 
 class Card(db.Model):

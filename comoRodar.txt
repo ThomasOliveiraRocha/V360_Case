@@ -10,33 +10,33 @@ CREATE DATABASE v360_db;
 
 # (opcional) Crie um usuário específico
 CREATE USER v360_user WITH PASSWORD 'V360';
-GRANT ALL PRIVILEGES ON DATABASE v360_db TO v360_user;
-\c v360_db
-
-
-
-
+GRANT ALL PRIVILEGES ON DATABASE v360_case TO v360_user;
+\c v360_case
 
 GRANT ALL ON SCHEMA public TO v360_user;
 
 
+
+# No terminal
+rm -r migrations
+
+# Depois:
+flask db init
+flask db migrate -m "Initial migration"
+flask db upgrade
+
+
+
+
 Back:
-
-python -m venv venv 
-.\venv\Scripts\activate
-
-python app.py 
-
-
-pip install -r requirements.txt
 
 python -m venv venv
 .\venv\Scripts\Activate
 pip install -r requirements.txt
+
 python setup.py
 python app.py
-flask db migrate -m "migration"
-flask db upgrade
+
 python -c "from seed import seed; seed()"
 
 ---------------------------------------------

@@ -46,13 +46,12 @@ export const moveCard = async (cardId, newListId, user = 'Sistema') => {
 };
 
 export const deleteCard = async (cardId, user = 'Sistema') => {
-  const res = await fetch(`${API_URL}/cards/${cardId}`, {
+  const res = await fetch(`${API_URL}/cards/${cardId}?user=${encodeURIComponent(user)}`, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user }),
   });
   return res.json();
 };
+
 
 // 🔹 Users
 export const fetchUsers = async () => {
@@ -68,6 +67,15 @@ export const createUser = async (name) => {
   });
   return res.json();
 };
+
+export const deleteUser = async (userId) => {
+  const res = await fetch(`${API_URL}/users/${userId}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Erro ao deletar usuário');
+  return res.json();
+};
+
 
 // 🔹 History
 export const fetchHistory = async () => {

@@ -18,11 +18,11 @@ export default function Sidebar() {
         <h2>Equipe</h2>
         <ul className="user-list">
           {users.map((user) => (
-            <li key={user} className="user-item">
-              <span>{user}</span>
+            <li key={user.id} className="user-item">
+              <span>{user.name}</span>
               <button
                 className="delete-button"
-                onClick={() => deleteUser(user)}
+                onClick={() => deleteUser(user.id)}
                 title="Remover usuário"
               >
                 <svg
@@ -32,7 +32,7 @@ export default function Sidebar() {
                   fill="currentColor"
                   viewBox="0 0 16 16"
                 >
-                  <path d="M4.646 4.646a.5.5 0 011 0L8 7.293l2.354-2.647a.5.5 0 11.708.708L8.707 8l2.647 2.354a.5.5 0 11-.708.708L8 8.707l-2.354 2.647a.5.5 0 11-.708-.708L7.293 8 4.646 5.646a.5.5 0 010-.708z"/>
+                  <path d="M4.646 4.646a.5.5 0 011 0L8 7.293l2.354-2.647a.5.5 0 11.708.708L8.707 8l2.647 2.354a.5.5 0 11-.708.708L8 8.707l-2.354 2.647a.5.5 0 11-.708-.708L7.293 8 4.646 5.646a.5.5 0 010-.708z" />
                 </svg>
               </button>
             </li>
