@@ -4,7 +4,7 @@ import { useAppContext } from './context/AppContext';
 import List from './components/List';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import './index.css';
+import './public/index.css';
 
 export default function App() {
   const {
