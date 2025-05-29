@@ -4,7 +4,7 @@ from flask_cors import CORS
 from models import db
 from routes import api_bp
 from dotenv import load_dotenv
-from seed import seed
+from seeder import run_seed
 import os
 
 load_dotenv()
@@ -35,9 +35,9 @@ def internal_error(e):
     return jsonify({'status': 'error', 'message': 'Internal server error'}), 500
 
 @app.route('/run-seed')
-def run_seed():
+def run_seed_route():
     try:
-        seed()
+        run_seed()
         return jsonify({'message': '🌱 Banco populado com sucesso!'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
