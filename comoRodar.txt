@@ -66,13 +66,23 @@ Projeto desenvolvido para o desafio técnico da Visagio.
 - Python + Flask
 - PostgreSQL
 - SQLAlchemy + Flask-Migrate
-- Deploy no Render
 
 ## 📦 Setup local
 
+Back
 ```bash
 python -m venv venv
-source venv/bin/activate  # ou .\venv\Scripts\Activate no Windows
+.\venv\Scripts\Activate
 pip install -r requirements.txt
-flask db upgrade
+
+python setup.py
 python app.py
+
+Front
+se não tiver
+npm create vite@latest
+#React
+#JavaScript
+
+npm install
+npm run dev
