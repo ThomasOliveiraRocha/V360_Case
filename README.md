@@ -1,11 +1,11 @@
 
-# 📝 ToDo List - API + Frontend + Backend + Python
+# ToDo List - API + Frontend + Backend + Python
 
 Projeto desenvolvido como parte do **desafio técnico da Visagio**.  
 Uma aplicação de gerenciamento de tarefas estilo Kanban, com listas, cards, checklists e atribuição de usuários.
 ---
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 ### Backend
 - [Python](https://www.python.org/) + [Flask](https://flask.palletsprojects.com/)
@@ -23,20 +23,19 @@ Uma aplicação de gerenciamento de tarefas estilo Kanban, com listas, cards, ch
 
 ---
 
-## 🏗️ Funcionalidades
-- ✅ CRUD de Listas
-- ✅ CRUD de Cards
-- ✅ Checklists dentro dos cards
-- ✅ Atribuição de usuários tanto aos cards quanto aos itens dos checklists
-- ✅ Drag and Drop de listas e cards
-- ✅ Histórico de ações (log)
-- ✅ Responsivo e com modo claro/escuro
+## Funcionalidades
+- CRUD de Listas
+- CRUD de Cards
+- Checklists dentro dos cards
+- Atribuição de usuários tanto aos cards quanto aos itens dos checklists
+- Drag and Drop de listas e cards
+- Responsivo e com modo claro/escuro
 
 ---
 
-## 📦 Setup Local
+## Setup Local
 
-### 🔧 Backend
+### Backend
 
 1. Clone o repositório e acesse a pasta do backend:
 
@@ -89,7 +88,7 @@ python app.py
 
 ---
 
-### 🎨 Frontend
+### Frontend
 
 1. Acesse a pasta do frontend (ou crie caso não tenha):
 
@@ -114,7 +113,7 @@ npm run dev
 
 ---
 
-## 🗒️ Requirements.txt
+## Requirements.txt
 
 ```plaintext
 flask
@@ -126,10 +125,4 @@ python-dotenv
 flask-migrate
 ```
 
----
 
-## 📜 Licença
-
-Este projeto é de uso educacional e técnico, desenvolvido para o desafio da Visagio.
-
----
