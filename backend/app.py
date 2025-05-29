@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from flask_migrate import Migrate, upgrade
+from flask_migrate import Migrate
 from flask_cors import CORS
 from models import db
 from routes import api_bp
@@ -21,11 +21,6 @@ db.init_app(app)
 # Inicializa o Migrate
 migrate = Migrate(app, db)
 
-# 🚀 Executa as migrations automaticamente no startup
-with app.app_context():
-    print("🚀 Executando migrações no startup...")
-    upgrade()
-
 # Registrar as rotas
 app.register_blueprint(api_bp)
 
@@ -39,4 +34,4 @@ def internal_error(e):
     return jsonify({'status': 'error', 'message': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=False)  # 🔥 Debug sempre False em produção
+    app.run(debug=False)

@@ -55,3 +55,24 @@ npm create vite@latest
 npm install
 npm run dev
 
+
+
+
+# ToDo List API 📝
+
+Projeto desenvolvido para o desafio técnico da Visagio.
+
+## 🚀 Tecnologias
+- Python + Flask
+- PostgreSQL
+- SQLAlchemy + Flask-Migrate
+- Deploy no Render
+
+## 📦 Setup local
+
+```bash
+python -m venv venv
+source venv/bin/activate  # ou .\venv\Scripts\Activate no Windows
+pip install -r requirements.txt
+flask db upgrade
+python app.py
