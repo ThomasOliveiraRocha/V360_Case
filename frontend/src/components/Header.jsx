@@ -1,5 +1,5 @@
 import React from 'react';
-import '../index.css';
+import '../../public/index.css';
 
 export default function Header({ toggleTheme, theme }) {
   return (

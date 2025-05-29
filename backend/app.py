@@ -4,12 +4,14 @@ from flask_cors import CORS
 from models import db
 from routes import api_bp
 from dotenv import load_dotenv
+from seeder import run_seed
 import os
 
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 
 # 🔗 Configuração do banco de dados
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
@@ -18,7 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Inicializa o banco
 db.init_app(app)
 
-# Inicializa o Migrate (💡 sempre depois do init_app)
+# Inicializa o Migrate
 migrate = Migrate(app, db)
 
 # Registrar as rotas
@@ -33,5 +35,13 @@ def not_found(e):
 def internal_error(e):
     return jsonify({'status': 'error', 'message': 'Internal server error'}), 500
 
+@app.route('/run-seed')
+def run_seed_route():
+    try:
+        run_seed()
+        return jsonify({'message': '🌱 Banco populado com sucesso!'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
