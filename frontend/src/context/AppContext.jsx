@@ -94,34 +94,30 @@ export const AppProvider = ({ children }) => {
         const [removed] = reorderedLists.splice(source.index, 1);
         reorderedLists.splice(destination.index, 0, removed);
 
-
         setLists(reorderedLists);
 
-        try {
-
-          await axios.put(`${API_URL}/lists/${removed.id}/move`, {
-            new_position: destination.index,
-            user: 'Sistema',
-          });
-        } catch (error) {
-          console.error('Erro ao mover lista:', error);
-          showToast('Erro ao mover a lista.', 'error');
-        }
+        await axios.put(`${API_URL}/lists/${removed.id}/move`, {
+          new_position: destination.index,
+          user: 'Sistema',
+        });
 
         return;
       }
 
-
       if (type === 'card') {
-        const sourceList = lists.find((l) => l.id === source.droppableId);
-        const destList = lists.find((l) => l.id === destination.droppableId);
+        const sourceListId = parseInt(source.droppableId.replace('list-', ''));
+        const destListId = parseInt(destination.droppableId.replace('list-', ''));
+
+        const sourceList = lists.find((l) => l.id === sourceListId);
+        const destList = lists.find((l) => l.id === destListId);
 
         if (!sourceList || !destList) return;
 
         const sourceCards = [...sourceList.cards];
         const [movedCard] = sourceCards.splice(source.index, 1);
 
-        const destCards = [...destList.cards, movedCard]; // adiciona no final da lista de destino
+        const destCards = [...destList.cards];
+        destCards.splice(destination.index, 0, movedCard); // Insere na posição certa
 
         const updatedLists = lists.map((list) => {
           if (list.id === sourceList.id) return { ...list, cards: sourceCards };
@@ -131,16 +127,17 @@ export const AppProvider = ({ children }) => {
 
         setLists(updatedLists);
 
-        // 🔥 Faz a requisição apenas para atualizar a lista do card
         await axios.put(`${API_URL}/cards/${movedCard.id}/move`, {
           list_id: destList.id,
+          new_position: destination.index,
         });
       }
     } catch (error) {
       console.error('Erro ao mover:', error);
-      showToast('Erro ao mover o card.', 'error');
+      showToast('Erro ao mover.', 'error');
     }
   };
+
 
 
 
