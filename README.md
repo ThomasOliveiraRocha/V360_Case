@@ -129,7 +129,8 @@ flask-migrate
 ```
 
 
-<pre> ```mermaid [graph TD
+<pre> ```mermaid 
+graph TD
     subgraph Frontend [Frontend - React + Vite + JS + CSS]
         A[Interface de Usuário]
         A -->|Faz requisições HTTP| API
@@ -157,4 +158,4 @@ flask-migrate
     Logic --> Cards
     Logic --> Checklists
     Auth --> Users
-] ``` </pre>
+ ``` </pre>
