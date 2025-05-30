@@ -129,3 +129,32 @@ flask-migrate
 ```
 
 
+<pre> ```mermaid [graph TD
+    subgraph Frontend [Frontend - React + Vite + JS + CSS]
+        A[Interface de Usuário]
+        A -->|Faz requisições HTTP| API
+    end
+
+    subgraph Backend [Backend - Flask + Python]
+        API[API REST]
+        API -->|SQLAlchemy ORM| DB[(PostgreSQL)]
+        API -->|Gerencia regras de negócio| Logic[Regras de Negócio]
+        API -->|Controla| Auth[Gestão de Usuários e Atribuições]
+    end
+
+    subgraph Database [Database - PostgreSQL]
+        DB
+    end
+
+    A -->|Drag & Drop, CRUD, Checklists| API
+
+    DB -.->|Persistência dos dados| Listas[(Listas)]
+    DB -.-> Cards[(Cards)]
+    DB -.-> Checklists[(Checklists)]
+    DB -.-> Users[(Usuários)]
+
+    Logic --> Listas
+    Logic --> Cards
+    Logic --> Checklists
+    Auth --> Users
+] ``` </pre>
