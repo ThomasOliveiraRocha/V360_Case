@@ -10,7 +10,7 @@ export const AppProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const { showToast } = useToast();
 
-  const API_URL = "http://localhost:5000/";
+  const API_URL = "http://localhost:5000";
 
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export const AppProvider = ({ children }) => {
         const [movedCard] = sourceCards.splice(source.index, 1);
 
         const destCards = [...destList.cards];
-        destCards.splice(destination.index, 0, movedCard); // Insere na posição certa
+        destCards.splice(destination.index, 0, movedCard);
 
         const updatedLists = lists.map((list) => {
           if (list.id === sourceList.id) return { ...list, cards: sourceCards };
@@ -255,11 +255,15 @@ export const AppProvider = ({ children }) => {
           ...list,
           cards: list.cards.map((card) =>
             card.id === cardId
-              ? { ...card, checklist: [...card.checklist, res.data] }
+              ? {
+                ...card,
+                checklist: card.checklist ? [...card.checklist, res.data] : [res.data],
+              }
               : card
           ),
         }))
       );
+
       showToast('Subitem adicionado com sucesso!', 'success');
     } catch (error) {
       console.error('Erro ao adicionar subitem:', error);
@@ -269,6 +273,7 @@ export const AppProvider = ({ children }) => {
 
   const updateChecklistItem = async (itemId, cardId, updates) => {
     try {
+
       const res = await axios.put(`${API_URL}/checklist/${itemId}`, {
         ...updates,
         user: 'Sistema',
@@ -303,6 +308,7 @@ export const AppProvider = ({ children }) => {
 
   const deleteChecklistItem = async (itemId, cardId) => {
     try {
+
       await axios.delete(`${API_URL}/checklist/${itemId}?user=Sistema`);
 
       setLists((prevLists) =>

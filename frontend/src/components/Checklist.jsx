@@ -18,15 +18,15 @@ export default function Checklist({ card, onAdd, onDelete, onToggle, onAssignUse
     setShowForm(false);
   };
 
+
   const handleToggle = (item) => {
-
-
-    onToggle(card.id, item.id, { done: !item.done });
+    onToggle(item.id, card.id, { done: !item.done });
   };
 
   const handleDelete = (item) => {
-    onDelete(card.id, item.id);
+    onDelete(item.id, card.id);
   };
+
 
   return (
     <div className="checklist">

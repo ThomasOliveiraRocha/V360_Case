@@ -1,6 +1,6 @@
 const API_URL = 'http://localhost:5000';
 
-// 🔹 Lists
+//  Lists
 export const fetchLists = async () => {
   const res = await fetch(`${API_URL}/lists`);
   return res.json();
@@ -26,7 +26,7 @@ export const deleteList = async (listId, user = 'Sistema') => {
   return res.json();
 };
 
-// 🔹 Cards
+//  Cards
 export const createCard = async (listId, cardData, user = 'Sistema') => {
   const res = await fetch(`${API_URL}/lists/${listId}/cards`, {
     method: 'POST',
@@ -53,7 +53,7 @@ export const deleteCard = async (cardId, user = 'Sistema') => {
 };
 
 
-// 🔹 Users
+//  Users
 export const fetchUsers = async () => {
   const res = await fetch(`${API_URL}/users`);
   return res.json();
@@ -77,8 +77,42 @@ export const deleteUser = async (userId) => {
 };
 
 
-// 🔹 History
-export const fetchHistory = async () => {
-  const res = await fetch(`${API_URL}/history`);
+//  History
+export const fetchHistory = async (page = 1, perPage = 20, user = '', resourceType = '') => {
+  const query = new URLSearchParams({
+    page,
+    per_page: perPage,
+    user,
+    resource_type: resourceType,
+  });
+
+  const res = await fetch(`${API_URL}/history?${query}`);
   return res.json();
 };
+
+
+//  Checklist
+
+
+export const addChecklistItem = async (cardId, text, assignedUserId = null, user = 'Sistema') => {
+  const { data } = await axios.post(`${API_URL}/cards/${cardId}/checklist`, {
+    text,
+    assigned_user_id: assignedUserId,
+    user,
+  });
+  return data;
+};
+
+export const updateChecklistItem = async (itemId, updates, user = 'Sistema') => {
+  const { data } = await axios.put(`${API_URL}/checklist/${itemId}`, {
+    ...updates,
+    user,
+  });
+  return data;
+};
+
+export const deleteChecklistItem = async (itemId, user = 'Sistema') => {
+  const { data } = await axios.delete(`${API_URL}/checklist/${itemId}?user=${encodeURIComponent(user)}`);
+  return data;
+};
+

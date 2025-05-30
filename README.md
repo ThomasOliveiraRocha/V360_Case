@@ -31,6 +31,9 @@ Uma aplicação de gerenciamento de tarefas estilo Kanban, com listas, cards, ch
 - Drag and Drop de listas e cards
 - Responsivo e com modo claro/escuro
 
+
+Vídeo demonstrativo:
+https://drive.google.com/file/d/1jLfu5iv8eFUOvGapDVK5y77SHjTub0cz/view?usp=sharing
 ---
 
 ## Setup Local

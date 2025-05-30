@@ -17,7 +17,7 @@ def log_action(user, action, resource_id=None, resource_type=None):
     db.session.commit()
 
 
-# 🔸 Listas
+#  Listas
 @api_bp.route('/lists', methods=['GET'])
 def get_lists():
     lists = List.query.order_by(List.position).all()
@@ -148,7 +148,7 @@ def delete_list(list_id):
 
 
 
-# 🔸 Cards
+#  Cards
 @api_bp.route('/lists/<int:list_id>/cards', methods=['POST'])
 def add_card(list_id):
     data = request.json
@@ -171,6 +171,7 @@ def add_card(list_id):
         description=data.get('description', ''),
         assigned_user_id=data.get('assigned_user_id'),
         list_id=list_id
+        
     )
     db.session.add(card)
     db.session.commit()
@@ -181,7 +182,8 @@ def add_card(list_id):
         'id': card.id,
         'title': card.title,
         'description': card.description,
-        'assigned_user_id': card.assigned_user_id
+        'assigned_user_id': card.assigned_user_id,
+        'checklist': []
     })
 
 
@@ -249,7 +251,7 @@ def delete_card(card_id):
 
     card = Card.query.get(card_id)
     if not card:
-        return jsonify({'message': 'Card já não existia'}), 200  # ✅ Retorna 200
+        return jsonify({'message': 'Card já não existia'}), 200
 
     db.session.delete(card)
     db.session.commit()
@@ -261,11 +263,13 @@ def delete_card(card_id):
 
 
 
-# 🔸 Checklist
+#  Checklist
 @api_bp.route('/cards/<int:card_id>/checklist', methods=['POST'])
 def add_checklist_item(card_id):
     data = request.json
     user = data.get('user', 'Sistema')
+
+    print(f'Recebido POST para checklist: {data}')
 
     if not data.get('text'):
         return jsonify({'error': 'Texto é obrigatório'}), 400
@@ -279,6 +283,8 @@ def add_checklist_item(card_id):
     db.session.add(item)
     db.session.commit()
 
+    print(f'Item criado com ID: {item.id}')
+
     log_action(user, f"Adicionou o item '{item.text}' no checklist do card {card_id}", card_id, 'checklist')
 
     return jsonify({
@@ -289,6 +295,7 @@ def add_checklist_item(card_id):
     }), 201
 
 
+
 @api_bp.route('/checklist/<int:item_id>', methods=['PUT'])
 def update_checklist_item(item_id):
     data = request.json
@@ -296,7 +303,10 @@ def update_checklist_item(item_id):
 
     item = ChecklistItem.query.get_or_404(item_id)
     item.text = data.get('text', item.text)
-    item.done = bool(data.get('done', item.done))
+    
+    if 'done' in data:
+        item.done = bool(data['done']) if isinstance(data['done'], bool) else str(data['done']).lower() == 'true'
+
 
     item.assigned_user_id = data.get('assigned_user_id', item.assigned_user_id)
 
@@ -317,16 +327,16 @@ def delete_checklist_item(item_id):
     user = request.args.get('user', 'Sistema')
 
     item = ChecklistItem.query.get_or_404(item_id)
+    log_action(user, f"Removeu o item '{item.text}' do checklist", item.card_id, 'checklist')
     db.session.delete(item)
     db.session.commit()
 
-    log_action(user, f"Removeu o item '{item.text}' do checklist", item.card_id, 'checklist')
 
     return jsonify({'message': 'Checklist item deletado'})
 
 
 
-# 🔸 Histórico de ações
+#  Histórico de ações
 @api_bp.route('/history', methods=['GET'])
 def get_history():
     page = request.args.get('page', 1, type=int)
@@ -377,7 +387,7 @@ def get_history():
 
 
 
-# 🔸 Usuários
+#  Usuários
 @api_bp.route('/users', methods=['GET', 'POST'])
 def users():
     if request.method == 'GET':
@@ -387,24 +397,30 @@ def users():
         data = request.json
         name = data.get('name')
 
-        if not name:
-            return jsonify({'error': 'Name is required'}), 400
+        if not name or not name.strip():
+            return jsonify({'error': 'O nome é obrigatório'}), 400
 
-        user = User(name=name)
+        existing_user = User.query.filter_by(name=name.strip()).first()
+        if existing_user:
+            return jsonify({'error': 'Esse nome de usuário já existe'}), 400
+
+        user = User(name=name.strip())
         db.session.add(user)
         db.session.commit()
-        return jsonify({'id': user.id, 'name': user.name})
+
+        return jsonify({'id': user.id, 'name': user.name}), 201
+
 
 @api_bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
 
-    # 🔸 Remove a referência do usuário em cards
+    #  Remove a referência do usuário em cards
     cards = Card.query.filter_by(assigned_user_id=user.id).all()
     for card in cards:
         card.assigned_user_id = None
 
-    # 🔸 Remove a referência do usuário em checklist items
+    #  Remove a referência do usuário em checklist items
     items = ChecklistItem.query.filter_by(assigned_user_id=user.id).all()
     for item in items:
         item.assigned_user_id = None
