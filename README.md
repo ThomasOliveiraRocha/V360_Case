@@ -55,10 +55,12 @@ git clone https://github.com/ThomasOliveiraRocha/V360_Case.git
 cd V360_Case
 ```
 
-### 2. Crie o arquivo .env
+### 2. Crie o arquivo de variáveis de ambiente na pasta backend
 
 ```bash
+cd backend
 cp .env.example .env
+cd ..
 ```
 
 ### 3. Execute tudo com um comando
