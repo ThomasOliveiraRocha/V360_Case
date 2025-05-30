@@ -2,7 +2,7 @@
 
 > Projeto desenvolvido como parte do **desafio técnico da Visagio**
 
-Uma aplicação completa de gerenciamento de tarefas estilo Kanban, com interface moderna e funcionalidades avançadas de colaboração.
+Uma aplicação de gerenciamento de tarefas estilo Kanban, com listas, cards, checklists e atribuição de usuários.
 
 [![Demo Video]](https://drive.google.com/file/d/1jLfu5iv8eFUOvGapDVK5y77SHjTub0cz/view?usp=sharing)
 
