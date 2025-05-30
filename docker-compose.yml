@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: v360_backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - postgres
+    restart: always
+    command: sh -c "python setup.py && gunicorn -w 4 -b 0.0.0.0:5000 app:app"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: v360_frontend
+    ports:
+      - "3000:80"
+    restart: always
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: v360_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+    restart: always
+
+  postgres:
+    image: postgres:15
+    container_name: v360_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: senha
+      POSTGRES_DB: v360_kanban
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
