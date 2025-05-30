@@ -99,6 +99,10 @@ def create_list():
     if not title:
         return jsonify({'error': 'Title is required'}), 400
 
+    existing = List.query.filter(db.func.lower(List.title) == title.lower()).first()
+    if existing:
+        return jsonify({'error': 'Uma lista com este nome já existe'}), 400
+
     new_list = List(title=title)
     db.session.add(new_list)
     db.session.commit()
@@ -106,6 +110,7 @@ def create_list():
     log_action(user, f"Criou a lista '{title}'", new_list.id, 'list')
 
     return jsonify({'id': new_list.id, 'title': new_list.title}), 201
+
 
 @api_bp.route('/lists/<int:list_id>', methods=['PUT'])
 def update_list(list_id):
@@ -148,12 +153,21 @@ def delete_list(list_id):
 def add_card(list_id):
     data = request.json
     user = data.get('user', 'Sistema')
+    title = data.get('title')
 
-    if not data.get('title'):
+    if not title:
         return jsonify({'error': 'Title is required'}), 400
 
+    # Verifica se já existe um card com esse nome em qualquer lista
+    existing = Card.query.filter(
+        db.func.lower(Card.title) == title.lower()
+    ).first()
+
+    if existing:
+        return jsonify({'error': 'Já existe um card com esse nome no sistema'}), 400
+
     card = Card(
-        title=data['title'],
+        title=title,
         description=data.get('description', ''),
         assigned_user_id=data.get('assigned_user_id'),
         list_id=list_id
@@ -169,6 +183,7 @@ def add_card(list_id):
         'description': card.description,
         'assigned_user_id': card.assigned_user_id
     })
+
 
 @api_bp.route('/cards', methods=['GET'])
 def get_cards():

@@ -36,6 +36,11 @@ export const AppProvider = ({ children }) => {
 
   // Listas
   const addList = async (title) => {
+    if (lists.some((list) => list.title.toLowerCase() === title.trim().toLowerCase())) {
+      showToast('Já existe uma lista com esse nome.', 'error');
+      return;
+    }
+
     try {
       const res = await axios.post(`${API_URL}/lists`, { title });
       const newList = { ...res.data, cards: [] };
@@ -47,6 +52,7 @@ export const AppProvider = ({ children }) => {
       showToast('Erro ao adicionar lista.', 'error');
     }
   };
+
 
 
   const deleteList = async (listId, user = 'Sistema') => {
@@ -145,22 +151,35 @@ export const AppProvider = ({ children }) => {
 
   // Cards
   const addCard = async (listId, title, assignedUser) => {
+    const isDuplicate = lists.some((list) =>
+      list.cards.some(
+        (card) => card.title.toLowerCase() === title.trim().toLowerCase()
+      )
+    );
+
+    if (isDuplicate) {
+      showToast('Já existe um card com esse nome no sistema.', 'error');
+      return;
+    }
+
     try {
       const res = await axios.post(`${API_URL}/lists/${listId}/cards`, {
         title,
         assigned_user_id: assignedUser,
       });
+
       setLists(
         lists.map((list) =>
           list.id === listId ? { ...list, cards: [...list.cards, res.data] } : list
         )
       );
-      showToast('Card adicionado com sucesso!.', 'success');
+      showToast('Card adicionado com sucesso!', 'success');
     } catch (error) {
       console.error('Erro ao adicionar card:', error);
       showToast('Erro ao adicionar card.', 'error');
     }
   };
+
 
   const deleteCard = async (listId, cardId, user = 'Sistema') => {
     try {
