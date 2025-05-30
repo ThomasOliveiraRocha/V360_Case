@@ -23,11 +23,6 @@ Uma aplicação de gerenciamento de tarefas estilo Kanban, com listas, cards, ch
 ##  Tecnologias
 
 ### Backend
-![Python]
-![Flask]
-![PostgreSQL]
-![SQLAlchemy]
-
 - **Framework**: Flask + SQLAlchemy
 - **Banco de Dados**: PostgreSQL
 - **Migrações**: Flask-Migrate
@@ -35,19 +30,15 @@ Uma aplicação de gerenciamento de tarefas estilo Kanban, com listas, cards, ch
 - **Configuração**: python-dotenv
 
 ### Frontend
-![React]
-![Vite]
-![JavaScript]
-![CSS3]
-
 - **Framework**: React 18
 - **Build Tool**: Vite
 - **Estilização**: CSS puro com variáveis customizadas
 - **Estado**: React Hooks nativo
+- **Drag & Drop**: @hello-pangea/dnd
 
 ### DevOps
-![Docker]
-![Nginx]
+- **Containerização**: Docker + Docker Compose
+- **Proxy Reverso**: Nginx
 
 ---
 
@@ -172,17 +163,17 @@ npm run dev
 ##  Arquitetura do Sistema
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│                 │    │                 │    │                 │
-│   React Frontend│────│  Flask API      │────│   PostgreSQL    │
-│   (Port 3000)   │    │  (Port 5000)    │    │   (Port 5432)   │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │              ┌─────────────────┐              │
-         └──────────────│  Nginx Proxy    │──────────────┘
-                        │  (Port 80)      │
-                        └─────────────────┘
+                ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+                │                 │    │                 │    │                 │
+                │   React Frontend│────│  Flask API      │────│   PostgreSQL    │
+                │   (Port 3000)   │    │  (Port 5000)    │    │   (Port 5432)   │
+                │                 │    │                 │    │                 │
+                └─────────────────┘    └─────────────────┘    └─────────────────┘
+                        │                       │                       │
+                        │              ┌─────────────────┐              │
+                        └──────────────│  Nginx Proxy    │──────────────┘
+                                        │  (Port 80)      │
+                                        └─────────────────┘
 ```
 
 ![Diagrama da Arquitetura](./diagrama.svg)
@@ -269,6 +260,5 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 ---
 <div align="center">
   <p>Desenvolvido com ❤️ para o desafio técnico da Visagio</p>
-  
-  [![Demo]](http://localhost)
+
 </div>
