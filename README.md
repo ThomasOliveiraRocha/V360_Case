@@ -67,7 +67,7 @@ cp .env.example .env
 docker-compose up --build
 ```
 
-🎉 **Pronto!** Acesse: http://localhost
+ **Pronto!** Acesse: http://localhost:3000/
 
 ### Comandos úteis do Docker
 
@@ -207,58 +207,56 @@ npm run dev
 
 ---
 
-## 📦 Estrutura do Projeto
+##  Estrutura do Projeto
 
 ```
 V360_Case/
-├──  backend/
-│   ├── app.py                  # Aplicação principal Flask
-│   ├── models.py               # Modelos SQLAlchemy
-│   ├── routes.py               # Rotas da API
-│   ├── setup.py                # Dados iniciais
-│   │── requirements.txt        # Dependências Python
-│   ├── seed.py                 # Povoa o banco de dados
-│   └── setup.py                # Setup para desenvolvimento
-├──  frontend/
+├── backend/
+│   ├── app.py                # App Flask principal
+│   ├── models.py             # Modelos SQLAlchemy
+│   ├── routes.py             # Rotas da API
+│   ├── seed.py               # Seed do banco
+│   ├── setup.py              # Setup: migração + seed
+│   ├── requirements.txt      # Dependências Python
+│   ├── Dockerfile            # Imagem backend
+│   └── .env.example          # Exemplo de env
+├── frontend/
 │   ├── src/
-│   │   ├── components/         # Componentes React  
-│   │   ├── context/            # Context API para estado global
-│   │   └── services/         
+│   │   ├── components/       # Componentes React
+│   │   ├── context/          # Context API
+│   │   └── services/         # Comunicação API
+│   ├── public/               # Assets e index.html
+│   ├── App.jsx
+│   ├── main.jsx
 │   ├── package.json
-│   ├── public/index.css        # Arquivos CSS
-│   │── vite.config.js
-│   ├── App.jsx                 
-│   └── main.jsx
-├──  Dockerfile                 # Configuração Docker multi-stage
-├──  docker-compose.yml         # Orquestração dos serviços
-├──  nginx.conf                 # Configuração proxy reverso
-├──  init.sql                   # Script de inicialização do banco
-└──  README.md                  # Documentação do projeto
+│   ├── vite.config.js
+│   ├── Dockerfile            # imagem frontend
+├── nginx/
+│   ├── nginx.conf            # Configuração do proxy
+│   └── Dockerfile            # Imagem do Nginx
+├── docker-compose.yml        # Orquestração dos containers
+├── README.md                 # Este arquivo
+└── diagrama.svg              # Diagrama da arquitetura
 ```
 
 ---
 
-## 🔧 Configuração de Ambiente
+##  Configuração de Ambiente
 
 ### Variáveis de Ambiente (.env)
 
 ```env
 # Banco de Dados
-DATABASE_URL=postgresql://v360_user:v360_password@localhost:5432/v360_kanban
-DB_HOST=localhost
+DATABASE_URL=postgresql://usuario:senha@postgres:5432/v360_kanban
+DB_HOST=postgres
 DB_PORT=5432
-DB_USER=v360_user
-DB_PASSWORD=v360_password
+DB_USER=usuario
+DB_PASSWORD=senha
 DB_NAME=v360_kanban
-
-# Aplicação
-FLASK_ENV=development
-SECRET_KEY=your-super-secret-key-here
-CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 
 ---
 <div align="center">
-  <p>Desenvolvido com ❤️ para o desafio técnico da Visagio</p>
+  <p>Desenvolvido para o desafio técnico da Visagio</p>
 
 </div>
