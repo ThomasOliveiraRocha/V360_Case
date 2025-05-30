@@ -10,7 +10,7 @@ export const AppProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const { showToast } = useToast();
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = "http://localhost:5000/";
 
 
   useEffect(() => {
@@ -23,6 +23,7 @@ export const AppProvider = ({ children }) => {
         axios.get(`${API_URL}/lists`),
         axios.get(`${API_URL}/users`),
       ]);
+      console.log('usersRes.data:', usersRes.data);
 
       setLists(listsRes.data);
       setUsers(usersRes.data);
